@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>선플마블 - 디지털 시민 교육 보드게임</title>
+  <!-- 긴급 디버깅용 런타임 오류 감지기 (화면 얼럿으로 즉시 오류 보고) -->
+  <script>
+    window.onerror = function(message, source, lineno, colno, error) {
+      alert("🚨 자바스크립트 오류 감지!\n\n오류 내용: " + message + "\n파일: " + source + "\n라인: " + lineno + "\n\n이 팝업 창을 사진 찍거나 오류 내용을 그대로 적어서 전달해 주세요!");
+      return false;
+    };
+  </script>
+  <!-- Pretendard 가독성 최우선 웹폰트 적용 -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- 배경 장식용 그라데이션 및 레이어 -->
+  <div class="app-background"></div>
+
+  <!-- [1] 시작 설정 화면 -->
+  <div id="setup-screen" class="screen active">
+    <div class="setup-container">
+      <h1 class="game-title">✨ 선플마블 ✨</h1>
+      <p class="game-subtitle">올바른 댓글로 디지털 세상을 따뜻하게 만드는 보드게임</p>
+      
+      <div class="setup-section">
+        <h3>1. 게임 난이도를 선택해 주세요</h3>
+        <div class="difficulty-options">
+          <button type="button" class="btn-select active" data-difficulty="easy">
+            <span class="mode-title">쉬움 모드<br>(3~4학년 추천)</span>
+          </button>
+          <button type="button" class="btn-select" data-difficulty="hard">
+            <span class="mode-title">어려움 모드<br>(5~6학년 추천)</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="setup-section">
+        <h3>2. 함께 플레이할 친구는 몇 명인가요?</h3>
+        <div class="player-count-options">
+          <button type="button" class="btn-select-small active" data-players="2">2명</button>
+          <button type="button" class="btn-select-small" data-players="3">3명</button>
+          <button type="button" class="btn-select-small" data-players="4">4명</button>
+        </div>
+      </div>
+
+      <div class="setup-section colors-info">
+        <h3>🎮 플레이어 고유 색상 안내</h3>
+        <div class="colors-preview">
+          <div class="color-chip p1">P1: 오렌지 💬</div>
+          <div class="color-chip p2">P2: 블루 💬</div>
+          <div class="color-chip p3 hidden">P3: 그린 💬</div>
+          <div class="color-chip p4 hidden">P4: 초코 브라운 💬</div>
+        </div>
+      </div>
+
+      <div class="setup-actions">
+        <button id="btn-show-rules-setup" class="btn-sub">📜 게임 규칙 보기</button>
+        <button id="btn-start-game" class="btn-primary">🎮 게임 시작하기!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- [2] 게임 플레이 화면 -->
+  <div id="game-screen" class="screen">
+    <!-- 상단 메뉴바 -->
+    <header class="game-header">
+      <div class="header-logo">💬 선플마블</div>
+      <div class="header-actions">
+        <button id="btn-game-settings" class="btn-header">⚙️ 게임 설정</button>
+        <button id="btn-game-rules" class="btn-header">📜 게임 규칙</button>
+        <button id="btn-force-quit" class="btn-header btn-danger">⏹️ 게임 종료</button>
+      </div>
+    </header>
+
+    <div class="game-layout">
+      <!-- 오른쪽: 플레이어 현황판 (Scoreboard) -->
+      <aside class="scoreboard-panel">
+        <h2>👥 플레이어 정보</h2>
+        <div id="players-list" class="players-container">
+          <!-- JS로 동적 생성됨 -->
+        </div>
+        
+        <!-- 현재 차례 안내 및 주사위 판 -->
+        <div class="turn-control-card">
+          <div class="turn-announcement">
+            <span id="turn-message">주사위를 굴려주세요!</span>
+          </div>
+          
+          <!-- 3D 주사위 -->
+          <div class="dice-wrapper">
+            <div id="dice-container" class="dice-container">
+              <div class="dice" id="dice1">
+                <div class="face front">1</div>
+                <div class="face back">6</div>
+                <div class="face right">3</div>
+                <div class="face left">4</div>
+                <div class="face top">2</div>
+                <div class="face bottom">5</div>
+              </div>
+              <div class="dice" id="dice2">
+                <div class="face front">1</div>
+                <div class="face back">6</div>
+                <div class="face right">3</div>
+                <div class="face left">4</div>
+                <div class="face top">2</div>
+                <div class="face bottom">5</div>
+              </div>
+            </div>
+            <div id="dice-result-text" class="dice-result-text">주사위를 굴려주세요!</div>
+          </div>
+          
+          <button id="btn-roll-dice" class="btn-primary-large">🎲 주사위 굴리기</button>
+        </div>
+      </aside>
+
+      <!-- 왼쪽: 메인 보드판 -->
+      <main class="board-container">
+        <div id="board" class="board-grid easy-mode">
+          <!-- JS로 무작위 배치된 칸들이 동적으로 그려집니다 -->
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- [3] 팝업 모달들 -->
+  
+  <!-- A. 게임 규칙 설명 팝업 -->
+  <div id="rules-modal" class="modal-overlay">
+    <div class="modal-content rules-content">
+      <span class="modal-close" id="btn-close-rules">&times;</span>
+      <h2>📜 [선플 마블] 게임 규칙</h2>
+      <div class="rules-scroll-area">
+        <h3>1. 게임 목표</h3>
+        <p>다양한 디지털 플랫폼을 돌며 상황에 맞는 예쁜 댓글(선플)을 달아주세요! 게임이 끝났을 때 <strong>스마일 토큰(😊)</strong>을 가장 많이 세운 플레이어가 우승합니다.</p>
+        
+        <h3>2. 게임 구성 요소</h3>
+        <ul>
+          <li><strong>❤️ 하트 칩:</strong> 게임 속 화폐입니다. (시작 시 20개 지급)</li>
+          <li><strong>😊 스마일 토큰:</strong> 플랫폼에 선플을 달았다는 증표로 세우는 랜드마크입니다.</li>
+        </ul>
+
+        <h3>3. 게임 진행</h3>
+        <ol>
+          <li>
+            주사위 2개를 굴려 나온 합만큼 말을 이동합니다. (더블이 나오면 한 번 더!)
+          </li>
+          
+          <li>
+            <strong>플랫폼 칸 도착</strong>: 상황에 맞는 선플을 10초 내에 다른 친구들에게 직접 말합니다.
+            <ul>
+              <li><strong>선플 통과 조건 3가지:</strong> 존댓말 사용하기 / 비속어 및 줄임말 금지 / 존중과 배려 담기</li>
+            </ul>
+          </li>
+          
+          <li>
+            <strong>모두의 심사</strong>: 다른 친구들이 선플로 인정해주면 <strong>[성공]</strong>을 누르고 하트 칩을 지불해 스마일 토큰을 세웁니다.
+            <ul>
+              <li>❤️ 하트 2개 ➡️ 😊 스마일 토큰 1개 건설</li>
+              <li>❤️ 하트 4개 ➡️ 😊 스마일 토큰 2개 건설</li>
+              <li>❤️ 하트 6개 ➡️ 😊 스마일 토큰 3개 건설</li>
+              <li>- 스마일 토큰을 건설하지 않아도 됩니다.</li>
+            </ul>
+          </li>
+          
+          <li>
+            <strong>미션 실패 시</strong>: 올바르지 않은 글을 적었거나 실패했다면 <strong>[실패]</strong>를 누르고 벌금으로 하트 칩 1개를 [선플 캠페인 본부]에 냅니다.
+          </li>
+          
+          <li>
+            <strong>힐링 통행료</strong>: 다른 플레이어의 스마일 토큰이 있는 칸에 도달하면, 설치된 스마일 토큰의 개수만큼 하트칩을 플랫폼의 주인에게 지불합니다.
+          </li>
+        </ol>
+
+        <h3>4. 특수 칸 규칙</h3>
+        <ul>
+          <li><strong>💻 로그인 (시작점):</strong> 한 바퀴 돌 때마다 접속 보상으로 하트 칩 15개를 받습니다.</li>
+          <li><strong>🚨 사이버 수사대 조사실 (무인도):</strong> 악플 신고를 받아 갇힙니다. 주사위 더블이 나오거나 3턴 동안 쉬어야 탈출 가능합니다. 황금열쇠로 뽑은 [사이버 수사대 탈출 쿠폰]이 있다면 바로 탈출할 수 있습니다.</li>
+          <li><strong>💖 선플 캠페인 본부:</strong> 벌금이 모이는 곳입니다. 이 칸에 정확히 멈춘 플레이어가 쌓여 있는 하트칩을 모두 가져갑니다!</li>
+          <li><strong>🚀 알고리즘 떡상 (우주여행):</strong> 다음 턴에 주사위를 굴리지 않고 내가 가고 싶은 칸을 클릭하여 즉시 이동합니다.</li>
+        </ul>
+      </div>
+      <div class="rules-modal-actions text-center" id="rules-button-container">
+        <!-- JS로 게임 중 규칙을 열었을 때만 '게임으로 돌아가기' 버튼이 노출됨 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- B. 플랫폼 상황 카드 팝업 -->
+  <div id="mission-modal" class="modal-overlay">
+    <div class="modal-content mission-content">
+      <div id="mission-header-bar" class="mission-header">
+        <span id="mission-platform-type">배달의 만족</span>
+      </div>
+      <div class="mission-body">
+        <h3 class="mission-tag" id="mission-tag-type">[칭찬 미션]</h3>
+        <p class="mission-situation" id="mission-situation-text">"사장님이 정성껏 만든 수제 돈가스인데, 배달이 조금 늦어서 식어버렸다."</p>
+        
+        <!-- 타이머 영역 -->
+        <div class="timer-container" id="timer-box">
+          <div class="timer-circle">
+            <span id="timer-num">10</span>
+          </div>
+          <div class="timer-progress-bar">
+            <div class="timer-progress-fill" id="timer-fill"></div>
+          </div>
+          <p class="timer-guide">⚠️ 아래 3가지 수칙을 지켜 직접 선플을 말해보세요!</p>
+          <ul class="rule-checklist">
+            <li>✔️ 존댓말 사용하기</li>
+            <li>✔️ 비속어 및 줄임말 금지</li>
+            <li>✔️ 존중과 배려의 마음 담기</li>
+          </ul>
+        </div>
+
+        <!-- 미션 시작 전 버튼 -->
+        <button id="btn-start-timer" class="btn-primary-large">⏱️ 10초 타이머 시작</button>
+
+        <!-- 미션 성공/실패 판정 버튼 -->
+        <div id="mission-judgement-buttons" class="judgement-group hidden">
+          <p class="judgement-guide">💬 친구들이 직접 듣고 심사해 주세요. 선플 수칙을 지겼나요?</p>
+          <div class="judgement-actions">
+            <button id="btn-mission-fail" class="btn-danger-large">❌ 실패 (벌금으로 하트칩 1개)</button>
+            <button id="btn-mission-success" class="btn-success-large">⭕ 통과! (성공)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C. 스마일 토큰 건설 선택 팝업 -->
+  <div id="build-modal" class="modal-overlay">
+    <div class="modal-content build-content">
+      <h2>😊 스마일 토큰 세우기</h2>
+      <p class="build-subtitle">선플 미션 통과를 축하합니다! 하트를 내고 이 칸을 나만의 클린 존으로 만드세요.</p>
+      <div class="build-options">
+        <div class="build-card" data-build="1">
+          <span class="token-icons">😊</span>
+          <span class="build-title">스마일 토큰 1개</span>
+          <span class="cost-tag">❤️ 하트 2개 소모</span>
+        </div>
+        <div class="build-card" data-build="2">
+          <span class="token-icons">😊😊</span>
+          <span class="build-title">스마일 토큰 2개</span>
+          <span class="cost-tag">❤️ 하트 4개 소모</span>
+        </div>
+        <div class="build-card" data-build="3">
+          <span class="token-icons">😊😊😊</span>
+          <span class="build-title">스마일 토큰 3개</span>
+          <span class="cost-tag">❤️ 하트 6개 소모</span>
+        </div>
+        <div class="build-card pass" data-build="0">
+          <span class="token-icons">❌</span>
+          <span class="build-title">토큰을 세우지 않음</span>
+          <span class="cost-tag">소모품 없음</span>
+        </div>
+      </div>
+      <div class="player-current-heart-info">
+        내 현재 자금: <strong id="build-player-heart">20</strong>개
+      </div>
+    </div>
+  </div>
+
+  <!-- D. 황금열쇠 팝업 -->
+  <div id="goldkey-modal" class="modal-overlay">
+    <div class="modal-content goldkey-content">
+      <div class="goldkey-icon">🗝️</div>
+      <h2>황금열쇠</h2>
+      <div class="goldkey-body">
+        <p class="goldkey-desc" id="goldkey-title">[사이버 수사대 탈출 쿠폰 획득]</p>
+        <p class="goldkey-detail" id="goldkey-desc-text">부모님과 정한 스마트폰 사용 시간을 어기지 않고 잘 지켰습니다.</p>
+        <p class="goldkey-result" id="goldkey-result-text">결과: 쿠폰 1장 획득</p>
+      </div>
+      <button id="btn-close-goldkey" class="btn-primary-large">확인</button>
+    </div>
+  </div>
+
+  <!-- E. 사이버 수사대 탈출 쿠폰 사용 여부 팝업 -->
+  <div id="jail-modal" class="modal-overlay">
+    <div class="modal-content jail-content">
+      <div class="jail-icon">🚨</div>
+      <h2>사이버 수사대 조사실</h2>
+      <p class="jail-subtitle">현재 사이버 수사대에서 조사를 받고 있습니다. (반성 중...)</p>
+      <div class="jail-ticket-info">
+        🎟️ 보유 중인 탈출 쿠폰: <strong id="jail-player-ticket-count">1</strong>장
+      </div>
+      <p class="jail-question">사이버 수사대 탈출 쿠폰을 사용하여 바로 조사실을 탈출하시겠습니까?</p>
+      <div class="jail-actions">
+        <button id="btn-jail-use-ticket" class="btn-success-large">네 (쿠폰 1장 소모 후 주사위 굴려 이동)</button>
+        <button id="btn-jail-no-ticket" class="btn-danger-large">아니오 (더블을 노리거나 턴 대기)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- F. 게임 종료 / 랭킹 확인 팝업 -->
+  <div id="gameover-modal" class="modal-overlay">
+    <div class="modal-content gameover-content">
+      <h2>🏆 선플마블 게임 종료 🏆</h2>
+      <p class="gameover-subtitle" id="gameover-reason-text">플레이어의 파산으로 게임이 종료되었습니다.</p>
+      
+      <!-- 순위 랭킹 리스트 -->
+      <div class="ranking-panel">
+        <h3>📊 최종 디지털 시민 랭킹</h3>
+        <div class="ranking-list" id="ranking-list-container">
+          <!-- JS로 동적 랭킹 생성 -->
+        </div>
+      </div>
+
+      <p class="gameover-reset-question">초기 설정 화면으로 돌아가시겠습니까?</p>
+      <div class="gameover-actions">
+        <button id="btn-gameover-yes" class="btn-success-large">네 (처음으로 돌아가기)</button>
+        <button id="btn-gameover-no" class="btn-danger-large">아니오 (계속 진행하기)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- G. 게임 환경 설정 팝업 -->
+  <div id="settings-modal" class="modal-overlay">
+    <div class="modal-content settings-content">
+      <h2>⚙️ 게임 환경 설정</h2>
+      <p class="modal-subtitle">원하는 게임 옵션을 자유롭게 조절할 수 있습니다.</p>
+
+      <div class="settings-section">
+        <h3>🎲 주사위 굴리기 속도</h3>
+        <div class="setting-options" id="setting-dice-speed-group">
+          <button type="button" class="btn-select-small" data-speed="400">⚡ 빠르게</button>
+          <button type="button" class="btn-select-small active" data-speed="800">👍 보통</button>
+          <button type="button" class="btn-select-small" data-speed="1500">🐢 느리게</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>⏱️ 미션 카드 수행 타이머</h3>
+        <div class="setting-options" id="setting-timer-duration-group">
+          <button type="button" class="btn-select-small active" data-timer="10">10초 (기본)</button>
+          <button type="button" class="btn-select-small" data-timer="15">15초</button>
+          <button type="button" class="btn-select-small" data-timer="20">20초</button>
+          <button type="button" class="btn-select-small" data-timer="30">30초</button>
+          <button type="button" class="btn-select-small" data-timer="0">제한없음</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>🔊 효과음 설정</h3>
+        <div class="setting-options">
+          <button type="button" id="btn-toggle-sound" class="btn-select-toggle active">
+            <span id="sound-status-icon">🔊</span> <span id="sound-status-text">효과음 켜짐</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="settings-actions">
+        <button id="btn-close-settings" class="btn-primary">닫기 및 적용</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 오디오 효과용 요소 -->
+  <audio id="sound-dice" src="" preload="auto"></audio>
+  <audio id="sound-success" src="" preload="auto"></audio>
+  <audio id="sound-fail" src="" preload="auto"></audio>
+  <audio id="sound-goldkey" src="" preload="auto"></audio>
+
+  <!-- 자바스크립트 엔진 연결 -->
+  <script src="app.js"></script>
+</body>
+</html>
