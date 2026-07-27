@@ -1,19 +1,6 @@
 {
   "name": "sunfull-marvel",
   "version": "1.0.0",
-  "description": "선플마블 - 올바른 댓글로 디지털 세상을 따뜻하게 만드는 디지털 시민 교육 보드게임",
-  "main": "index.html",
-  "scripts": {
-    "start": "npx serve .",
-    "build": "echo 'Static build complete'"
-  },
-  "keywords": [
-    "boardgame",
-    "education",
-    "sunfull",
-    "digital-citizenship",
-    "game"
-  ],
-  "author": "",
-  "license": "MIT"
+  "private": true,
+  "description": "선플마블 - 올바른 댓글로 디지털 세상을 따뜻하게 만드는 디지털 시민 교육 보드게임"
 }
