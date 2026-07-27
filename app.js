@@ -395,10 +395,10 @@ document.addEventListener('DOMContentLoaded', () => {
     hideModal(settingsModal);
   });
 
-  // 주사위 속도 프로그레스 슬라이더 이벤트
+  // 주사위 속도 프로그레스 슬라이더 이벤트 (1: 느리게 1600ms, 2: 보통 800ms, 3: 빠르게 400ms)
   const speedRange = document.getElementById('setting-dice-speed-range');
   const speedLabels = document.querySelectorAll('.speed-label');
-  const speedMap = { 1: 400, 2: 800, 3: 1500 };
+  const speedMap = { 1: 1600, 2: 800, 3: 400 };
 
   if (speedRange) {
     speedRange.addEventListener('input', (e) => {
@@ -853,6 +853,10 @@ function endTurn() {
 // ==========================================================================
 // 10. 주사위 작동 & 플레이어 말 이동
 // ==========================================================================
+// 누적 주사위 회전 각도 (단 1회의 연속 회전 구현용)
+let diceTotalRot1 = { x: 0, y: 0 };
+let diceTotalRot2 = { x: 0, y: 0 };
+
 function rollDice() {
   if (gameState.isRolling || gameState.isMovementActive || gameState.teleportMode) return;
   
@@ -870,31 +874,41 @@ function rollDice() {
 
   const d1El = document.getElementById('dice1');
   const d2El = document.getElementById('dice2');
-  
-  const xRand1 = Math.floor(Math.random() * 4) * 90 + 360;
-  const yRand1 = Math.floor(Math.random() * 4) * 90 + 360;
-  const xRand2 = Math.floor(Math.random() * 4) * 90 + 360;
-  const yRand2 = Math.floor(Math.random() * 4) * 90 + 360;
-
-  const faceTransforms = {
-    1: 'rotateX(0deg) rotateY(0deg)',
-    6: 'rotateY(180deg)',
-    3: 'rotateY(-90deg)',
-    4: 'rotateY(90deg)',
-    2: 'rotateX(-90deg)',
-    5: 'rotateX(90deg)'
-  };
-
-  d1El.style.transform = `rotateX(${xRand1}deg) rotateY(${yRand1}deg)`;
-  d2El.style.transform = `rotateX(${xRand2}deg) rotateY(${yRand2}deg)`;
 
   const rollSpeed = gameState.settings ? gameState.settings.diceSpeed : 800;
+  const transitionSec = (rollSpeed / 1000).toFixed(2);
+
+  // 선택한 속도(400ms/800ms/1600ms)에 맞게 CSS 트랜지션 속도를 동적으로 설정
+  d1El.style.transition = `transform ${transitionSec}s cubic-bezier(0.25, 0.8, 0.25, 1)`;
+  d2El.style.transition = `transform ${transitionSec}s cubic-bezier(0.25, 0.8, 0.25, 1)`;
+
+  // 각 눈금별 3D 회전 각도 맵
+  const faceOffsets = {
+    1: { x: 0, y: 0 },
+    6: { x: 0, y: 180 },
+    3: { x: 0, y: -90 },
+    4: { x: 0, y: 90 },
+    2: { x: -90, y: 0 },
+    5: { x: 90, y: 0 }
+  };
+
+  // 단 1회의 매끄러운 3D 회전 애니메이션 계산 (2바퀴 = 720도 회전 후 해당 눈금에 안착)
+  diceTotalRot1.x += 720;
+  diceTotalRot1.y += 720;
+  diceTotalRot2.x += 720;
+  diceTotalRot2.y += 720;
+
+  const targetX1 = diceTotalRot1.x + faceOffsets[die1].x;
+  const targetY1 = diceTotalRot1.y + faceOffsets[die1].y;
+  const targetX2 = diceTotalRot2.x + faceOffsets[die2].x;
+  const targetY2 = diceTotalRot2.y + faceOffsets[die2].y;
+
+  // 단 한 번의 트랜스폼으로 주사위 굴림 실행
+  d1El.style.transform = `rotateX(${targetX1}deg) rotateY(${targetY1}deg)`;
+  d2El.style.transform = `rotateX(${targetX2}deg) rotateY(${targetY2}deg)`;
 
   setTimeout(() => {
-    d1El.style.transform = faceTransforms[die1];
-    d2El.style.transform = faceTransforms[die2];
-    
-    // 더블 검출 시 화면 컨페티 이펙트 트리거 피드백 반영
+    // 회전이 정지되면 멈춘 주사위 눈금이 이동할 숫자가 됨
     if (isDouble && !currentPlayer.isJailed) {
       diceResultText.innerText = `결과: ${die1} + ${die2} = ${total} ★더블!★`;
       triggerDoubleConfetti();
