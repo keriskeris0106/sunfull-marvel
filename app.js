@@ -257,6 +257,22 @@ const AudioFX = (function() {
   return { play };
 })();
 
+// LocalStorage 기반 영구 설정 로드/저장 모듈
+const SAVED_SETTINGS = (function() {
+  try {
+    const raw = localStorage.getItem('sunfull_marvel_settings');
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+})();
+
+function saveSettingsToStorage() {
+  try {
+    localStorage.setItem('sunfull_marvel_settings', JSON.stringify(gameState.settings));
+  } catch (e) {}
+}
+
 // 4. 게임 상태 객체
 let gameState = {
   difficulty: 'easy',       
@@ -269,7 +285,7 @@ let gameState = {
   isMovementActive: false,  
   teleportMode: false,      
   timerInterval: null,
-  settings: {
+  settings: SAVED_SETTINGS || {
     diceSpeed: 800,        // 주사위 롤링 속도 (800ms 기본)
     timerDuration: 10,     // 미션 수행 제한시간 (10초 기본)
     isMuted: false         // 효과음 음소거 여부
@@ -381,17 +397,19 @@ document.addEventListener('DOMContentLoaded', () => {
     hideModal(gameoverModal);
   });
 
-  // [NEW] 게임 설정 모달 관련 이벤트
+  // [NEW] 게임 설정 모달 관련 이벤트 & UI 동기화 모듈
   const settingsModal = document.getElementById('settings-modal');
   const btnGameSettings = document.getElementById('btn-game-settings');
   if (btnGameSettings) {
     btnGameSettings.addEventListener('click', () => {
       AudioFX.play('click');
+      syncSettingsUI();
       showModal(settingsModal);
     });
   }
   document.getElementById('btn-close-settings').addEventListener('click', () => {
     AudioFX.play('click');
+    saveSettingsToStorage();
     hideModal(settingsModal);
   });
 
@@ -404,6 +422,7 @@ document.addEventListener('DOMContentLoaded', () => {
     speedRange.addEventListener('input', (e) => {
       const val = parseInt(e.target.value);
       gameState.settings.diceSpeed = speedMap[val] || 800;
+      saveSettingsToStorage();
       speedLabels.forEach(lbl => {
         if (parseInt(lbl.dataset.step) === val) {
           lbl.classList.add('active');
@@ -419,6 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const step = parseInt(e.currentTarget.dataset.step);
         speedRange.value = step;
         gameState.settings.diceSpeed = speedMap[step] || 800;
+        saveSettingsToStorage();
         speedLabels.forEach(l => l.classList.remove('active'));
         e.currentTarget.classList.add('active');
         AudioFX.play('click');
@@ -433,6 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('#setting-timer-duration-group .btn-setting-chip').forEach(b => b.classList.remove('active'));
       e.currentTarget.classList.add('active');
       gameState.settings.timerDuration = parseInt(e.currentTarget.dataset.timer);
+      saveSettingsToStorage();
     });
   });
 
@@ -443,6 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (soundToggle) {
     soundToggle.addEventListener('change', (e) => {
       gameState.settings.isMuted = !e.target.checked;
+      saveSettingsToStorage();
       if (gameState.settings.isMuted) {
         soundStatusLabel.innerText = '🔇 효과음 꺼짐';
       } else {
@@ -451,7 +473,43 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // 초기 설정 UI 동기화 실행
+  syncSettingsUI();
 });
+
+function syncSettingsUI() {
+  const speedRange = document.getElementById('setting-dice-speed-range');
+  const speedLabels = document.querySelectorAll('.speed-label');
+  const timerChips = document.querySelectorAll('#setting-timer-duration-group .btn-setting-chip');
+  const soundToggle = document.getElementById('setting-sound-toggle');
+  const soundStatusLabel = document.getElementById('sound-status-label');
+
+  let stepVal = 2;
+  if (gameState.settings.diceSpeed >= 1400) stepVal = 1;
+  else if (gameState.settings.diceSpeed <= 500) stepVal = 3;
+
+  if (speedRange) speedRange.value = stepVal;
+  speedLabels.forEach(lbl => {
+    if (parseInt(lbl.dataset.step) === stepVal) lbl.classList.add('active');
+    else lbl.classList.remove('active');
+  });
+
+  timerChips.forEach(chip => {
+    if (parseInt(chip.dataset.timer) === gameState.settings.timerDuration) {
+      chip.classList.add('active');
+    } else {
+      chip.classList.remove('active');
+    }
+  });
+
+  if (soundToggle) {
+    soundToggle.checked = !gameState.settings.isMuted;
+  }
+  if (soundStatusLabel) {
+    soundStatusLabel.innerText = gameState.settings.isMuted ? '🔇 효과음 꺼짐' : '🔊 효과음 켜짐';
+  }
+}
 
 function setupRulesModalButton(isIngame) {
   const container = document.getElementById('rules-button-container');
@@ -1010,7 +1068,8 @@ function animatePlayerMovement(player, steps, isDouble) {
       
       updatePawnPositions();
       currentStep++;
-      setTimeout(step, 500); // 500ms
+      const stepDelay = Math.max(160, Math.round(gameState.settings.diceSpeed * 0.45));
+      setTimeout(step, stepDelay);
     } else {
       gameState.isMovementActive = false;
       handleCellLandAction(player, player.position, isDouble);
