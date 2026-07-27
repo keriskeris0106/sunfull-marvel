@@ -286,7 +286,7 @@ let gameState = {
   teleportMode: false,      
   timerInterval: null,
   settings: SAVED_SETTINGS || {
-    diceSpeed: 800,        // 주사위 롤링 속도 (800ms 기본)
+    diceSpeed: 1500,       // 주사위 롤링 속도 (1500ms / 1.5초 기본)
     timerDuration: 10,     // 미션 수행 제한시간 (10초 기본)
     isMuted: false         // 효과음 음소거 여부
   }
@@ -413,15 +413,15 @@ document.addEventListener('DOMContentLoaded', () => {
     hideModal(settingsModal);
   });
 
-  // 주사위 속도 프로그레스 슬라이더 이벤트 (1: 느리게 1600ms, 2: 보통 800ms, 3: 빠르게 400ms)
+  // 주사위 속도 프로그레스 슬라이더 이벤트 (1: 느리게 3000ms (3초), 2: 보통 1500ms (1.5초), 3: 빠르게 400ms (0.4초))
   const speedRange = document.getElementById('setting-dice-speed-range');
   const speedLabels = document.querySelectorAll('.speed-label');
-  const speedMap = { 1: 1600, 2: 800, 3: 400 };
+  const speedMap = { 1: 3000, 2: 1500, 3: 400 };
 
   if (speedRange) {
     speedRange.addEventListener('input', (e) => {
       const val = parseInt(e.target.value);
-      gameState.settings.diceSpeed = speedMap[val] || 800;
+      gameState.settings.diceSpeed = speedMap[val] || 1500;
       saveSettingsToStorage();
       speedLabels.forEach(lbl => {
         if (parseInt(lbl.dataset.step) === val) {
@@ -437,7 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
       lbl.addEventListener('click', (e) => {
         const step = parseInt(e.currentTarget.dataset.step);
         speedRange.value = step;
-        gameState.settings.diceSpeed = speedMap[step] || 800;
+        gameState.settings.diceSpeed = speedMap[step] || 1500;
         saveSettingsToStorage();
         speedLabels.forEach(l => l.classList.remove('active'));
         e.currentTarget.classList.add('active');
@@ -486,8 +486,8 @@ function syncSettingsUI() {
   const soundStatusLabel = document.getElementById('sound-status-label');
 
   let stepVal = 2;
-  if (gameState.settings.diceSpeed >= 1400) stepVal = 1;
-  else if (gameState.settings.diceSpeed <= 500) stepVal = 3;
+  if (gameState.settings.diceSpeed >= 2200) stepVal = 1;
+  else if (gameState.settings.diceSpeed <= 600) stepVal = 3;
 
   if (speedRange) speedRange.value = stepVal;
   speedLabels.forEach(lbl => {
@@ -933,10 +933,10 @@ function rollDice() {
   const d1El = document.getElementById('dice1');
   const d2El = document.getElementById('dice2');
 
-  const rollSpeed = gameState.settings ? gameState.settings.diceSpeed : 800;
+  const rollSpeed = gameState.settings ? gameState.settings.diceSpeed : 1500;
   const transitionSec = (rollSpeed / 1000).toFixed(2);
 
-  // 선택한 속도(400ms/800ms/1600ms)에 맞게 CSS 트랜지션 속도를 동적으로 설정
+  // 선택한 속도(3000ms/1500ms/400ms)에 맞게 CSS 트랜지션 속도를 동적으로 설정
   d1El.style.transition = `transform ${transitionSec}s cubic-bezier(0.25, 0.8, 0.25, 1)`;
   d2El.style.transition = `transform ${transitionSec}s cubic-bezier(0.25, 0.8, 0.25, 1)`;
 
