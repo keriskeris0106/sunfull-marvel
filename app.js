@@ -395,44 +395,58 @@ document.addEventListener('DOMContentLoaded', () => {
     hideModal(settingsModal);
   });
 
-  // 주사위 속도 설정 버튼 그룹
-  document.querySelectorAll('#setting-dice-speed-group .btn-select-small').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      AudioFX.play('click');
-      document.querySelectorAll('#setting-dice-speed-group .btn-select-small').forEach(b => b.classList.remove('active'));
-      e.currentTarget.classList.add('active');
-      gameState.settings.diceSpeed = parseInt(e.currentTarget.dataset.speed);
-    });
-  });
+  // 주사위 속도 프로그레스 슬라이더 이벤트
+  const speedRange = document.getElementById('setting-dice-speed-range');
+  const speedLabels = document.querySelectorAll('.speed-label');
+  const speedMap = { 1: 400, 2: 800, 3: 1500 };
 
-  // 미션 타이머 시간 설정 버튼 그룹
-  document.querySelectorAll('#setting-timer-duration-group .btn-select-small').forEach(btn => {
+  if (speedRange) {
+    speedRange.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value);
+      gameState.settings.diceSpeed = speedMap[val] || 800;
+      speedLabels.forEach(lbl => {
+        if (parseInt(lbl.dataset.step) === val) {
+          lbl.classList.add('active');
+        } else {
+          lbl.classList.remove('active');
+        }
+      });
+      AudioFX.play('click');
+    });
+
+    speedLabels.forEach(lbl => {
+      lbl.addEventListener('click', (e) => {
+        const step = parseInt(e.currentTarget.dataset.step);
+        speedRange.value = step;
+        gameState.settings.diceSpeed = speedMap[step] || 800;
+        speedLabels.forEach(l => l.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        AudioFX.play('click');
+      });
+    });
+  }
+
+  // 미션 타이머 시간 설정 버튼 그룹 (칩 형태)
+  document.querySelectorAll('#setting-timer-duration-group .btn-setting-chip').forEach(btn => {
     btn.addEventListener('click', (e) => {
       AudioFX.play('click');
-      document.querySelectorAll('#setting-timer-duration-group .btn-select-small').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#setting-timer-duration-group .btn-setting-chip').forEach(b => b.classList.remove('active'));
       e.currentTarget.classList.add('active');
       gameState.settings.timerDuration = parseInt(e.currentTarget.dataset.timer);
     });
   });
 
-  // 효과음 음소거 토글 버튼
-  const btnToggleSound = document.getElementById('btn-toggle-sound');
-  const soundStatusIcon = document.getElementById('sound-status-icon');
-  const soundStatusText = document.getElementById('sound-status-text');
+  // 효과음 스위치 토글 이벤트
+  const soundToggle = document.getElementById('setting-sound-toggle');
+  const soundStatusLabel = document.getElementById('sound-status-label');
 
-  if (btnToggleSound) {
-    btnToggleSound.addEventListener('click', () => {
-      gameState.settings.isMuted = !gameState.settings.isMuted;
+  if (soundToggle) {
+    soundToggle.addEventListener('change', (e) => {
+      gameState.settings.isMuted = !e.target.checked;
       if (gameState.settings.isMuted) {
-        btnToggleSound.classList.remove('active');
-        btnToggleSound.classList.add('muted');
-        soundStatusIcon.innerText = '🔇';
-        soundStatusText.innerText = '효과음 켜기';
+        soundStatusLabel.innerText = '🔇 효과음 꺼짐';
       } else {
-        btnToggleSound.classList.remove('muted');
-        btnToggleSound.classList.add('active');
-        soundStatusIcon.innerText = '🔊';
-        soundStatusText.innerText = '효과음 켜짐';
+        soundStatusLabel.innerText = '🔊 효과음 켜짐';
         AudioFX.play('click');
       }
     });

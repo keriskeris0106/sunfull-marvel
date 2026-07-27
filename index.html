@@ -324,35 +324,40 @@
 
       <div class="settings-section">
         <h3>🎲 주사위 굴리기 속도</h3>
-        <div class="setting-options" id="setting-dice-speed-group">
-          <button type="button" class="btn-select-small" data-speed="400">⚡ 빠르게</button>
-          <button type="button" class="btn-select-small active" data-speed="800">👍 보통</button>
-          <button type="button" class="btn-select-small" data-speed="1500">🐢 느리게</button>
+        <div class="speed-slider-container">
+          <input type="range" id="setting-dice-speed-range" min="1" max="3" step="1" value="2">
+          <div class="speed-slider-labels">
+            <span class="speed-label" data-step="1">⚡ 빠르게</span>
+            <span class="speed-label active" data-step="2">👍 보통</span>
+            <span class="speed-label" data-step="3">🐢 느리게</span>
+          </div>
         </div>
       </div>
 
       <div class="settings-section">
         <h3>⏱️ 미션 카드 수행 타이머</h3>
         <div class="setting-options" id="setting-timer-duration-group">
-          <button type="button" class="btn-select-small active" data-timer="10">10초 (기본)</button>
-          <button type="button" class="btn-select-small" data-timer="15">15초</button>
-          <button type="button" class="btn-select-small" data-timer="20">20초</button>
-          <button type="button" class="btn-select-small" data-timer="30">30초</button>
-          <button type="button" class="btn-select-small" data-timer="0">제한없음</button>
+          <button type="button" class="btn-setting-chip active" data-timer="10">10초 (기본)</button>
+          <button type="button" class="btn-setting-chip" data-timer="15">15초</button>
+          <button type="button" class="btn-setting-chip" data-timer="20">20초</button>
+          <button type="button" class="btn-setting-chip" data-timer="30">30초</button>
+          <button type="button" class="btn-setting-chip" data-timer="0">제한없음</button>
         </div>
       </div>
 
       <div class="settings-section">
         <h3>🔊 효과음 설정</h3>
-        <div class="setting-options">
-          <button type="button" id="btn-toggle-sound" class="btn-select-toggle active">
-            <span id="sound-status-icon">🔊</span> <span id="sound-status-text">효과음 켜짐</span>
-          </button>
+        <div class="sound-toggle-wrapper">
+          <label class="toggle-switch">
+            <input type="checkbox" id="setting-sound-toggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+          <span id="sound-status-label" class="sound-status-label">🔊 효과음 켜짐</span>
         </div>
       </div>
 
       <div class="settings-actions">
-        <button id="btn-close-settings" class="btn-primary">닫기 및 적용</button>
+        <button id="btn-close-settings" class="btn-settings-apply">닫기 및 적용</button>
       </div>
     </div>
   </div>

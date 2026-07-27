@@ -1512,3 +1512,197 @@ body {
     height: 13px;
   }
 }
+
+/* ==========================================================================
+   G. 게임 환경 설정 팝업 모달 스타일 (개선본)
+   ========================================================================== */
+.settings-content {
+  max-width: 440px;
+  width: 90%;
+  padding: 24px 28px;
+  border-radius: 16px;
+  background: #FFFFFF;
+  box-shadow: var(--shadow-strong);
+  border-top: 5px solid var(--color-baemin);
+  text-align: left;
+}
+
+.settings-content h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+}
+
+.settings-content .modal-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.settings-section {
+  margin-bottom: 20px;
+}
+
+.settings-section h3 {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 10px;
+}
+
+/* 주사위 속도 슬라이더 / 프로그레스 바 */
+.speed-slider-container {
+  background: #F8F9FA;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid #E9ECEF;
+}
+
+.speed-slider-container input[type="range"] {
+  width: 100%;
+  accent-color: var(--color-baemin);
+  cursor: pointer;
+  height: 6px;
+  border-radius: 3px;
+  margin-bottom: 4px;
+}
+
+.speed-slider-labels {
+  display: flex;
+  justify-content: space-between;
+}
+
+.speed-label {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease, font-weight 0.2s ease;
+}
+
+.speed-label.active {
+  color: var(--color-baemin);
+  font-weight: 800;
+}
+
+/* 타이머 칩 버튼들 */
+.setting-options {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.btn-setting-chip {
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: 20px;
+  border: 1.5px solid #E0E0E0;
+  background-color: #F8F9FA;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-setting-chip:hover {
+  border-color: var(--color-baemin);
+}
+
+.btn-setting-chip.active {
+  background-color: var(--color-baemin);
+  border-color: var(--color-baemin);
+  color: #FFFFFF;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(42, 193, 188, 0.3);
+}
+
+/* 효과음 iOS 스타일 스위치 토글 */
+.sound-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #F8F9FA;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid #E9ECEF;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #BDC3C7;
+  transition: .3s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+input:checked + .toggle-slider {
+  background-color: var(--color-baemin);
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(22px);
+}
+
+.sound-status-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+/* 적당하고 보기 좋은 닫기 버튼 */
+.settings-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.btn-settings-apply {
+  padding: 10px 22px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  background-color: var(--color-baemin);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(42, 193, 188, 0.3);
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-settings-apply:hover {
+  background-color: #229A95;
+}
+
+.btn-settings-apply:active {
+  transform: scale(0.97);
+}
+
